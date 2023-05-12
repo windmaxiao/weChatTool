@@ -1,2 +1,17 @@
 server:
   port: 81
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url:
+    username:
+    password:
+    #type: com.zaxxer.hikari.HikariDataSource
+  jpa:
+    show-sql: true #是否显示数据库语句
+
+mybatis-plus:
+  configuration:
+    mapper-locations: classpath:mapper/*.xml
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

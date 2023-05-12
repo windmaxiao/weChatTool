@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class AddressController {
 
     @Autowired
-    AddressService addressSercice;
+    AddressService addressService;
+
 
 
     @GetMapping("/address")
     public ResponseEntity showAddress() {
-       ;
-        return ResponseEntity.ok(addressSercice.getServiceAddress());
+        return ResponseEntity.ok(addressService.getServiceAddress());
     }
 }
