@@ -15,4 +15,9 @@ public interface WxServices {
      */
     String checkSignature(String signature, String timestamp, String nonce, String echostr);
 
+    /**
+     * 获取微信accessToken
+     */
+    void getAccessToken();
+
 }
