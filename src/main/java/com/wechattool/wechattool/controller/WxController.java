@@ -50,9 +50,6 @@ public class WxController {
 
         dataWxMsgService.save(msg);
 
-
-        log.info("1");
-
         return wxServices.checkSignature(signature, timestamp, nonce, echostr);
     }
 
