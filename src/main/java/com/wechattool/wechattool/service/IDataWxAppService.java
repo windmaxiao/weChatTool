@@ -13,4 +13,10 @@ import com.wechattool.wechattool.model.DataWxApp;
  */
 public interface IDataWxAppService extends IService<DataWxApp> {
 
+    /**
+     * 获取微信验证的数据
+     * @return
+     */
+    DataWxApp getWxData();
+
 }

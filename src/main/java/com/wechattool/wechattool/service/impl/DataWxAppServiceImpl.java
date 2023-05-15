@@ -17,4 +17,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class DataWxAppServiceImpl extends ServiceImpl<DataWxAppMapper, DataWxApp> implements IDataWxAppService {
 
+    @Override
+    public DataWxApp getWxData() {
+        return this.getById("1");
+    }
 }

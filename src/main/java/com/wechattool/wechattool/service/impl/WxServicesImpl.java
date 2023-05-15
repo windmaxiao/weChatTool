@@ -1,20 +1,18 @@
 package com.wechattool.wechattool.service.impl;
 
 import cn.hutool.crypto.SecureUtil;
-import com.squareup.okhttp.Call;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 import com.wechattool.wechattool.model.DataWxApp;
+import com.wechattool.wechattool.model.DataWxMsg;
 import com.wechattool.wechattool.service.IDataWxAppService;
 import com.wechattool.wechattool.service.IDataWxMsgService;
 import com.wechattool.wechattool.service.WxServices;
+import com.wechattool.wechattool.tools.OkHttpClientUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,10 +34,10 @@ public class WxServicesImpl implements WxServices {
     @Override
     public String checkSignature(String signature, String timestamp, String nonce, String echostr) {
 
-        DataWxApp dataWxApp = dataWxAppService.getById("1");
+        DataWxApp dataWxApp = dataWxAppService.getWxData();
 
         String token = dataWxApp.getToken();
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         list.add(token);
         list.add(timestamp);
         list.add(nonce);
@@ -57,26 +55,27 @@ public class WxServicesImpl implements WxServices {
         if (StringUtils.equals(password, signature)) {
             return echostr;
         }
-
-
         return null;
     }
 
     @Override
     public void getAccessToken() {
 
-        DataWxApp dataWxApp = dataWxAppService.getById("1");
+        DataWxApp dataWxApp = dataWxAppService.getWxData();
 
-        OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder().url(ACCESS_TOKEN_URL + "?grant_type=client_credential&appid="
-                + dataWxApp .getAppId() + "&secret=" + dataWxApp.getAppSecret()).build();
-        Call call = client.newCall(request);
-        try {
-            Response response = call.execute();
-            log.info("返回的数据：" + response.body().string());
-            // TODO save response
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        String response = OkHttpClientUtils.builder().url(ACCESS_TOKEN_URL)
+                .addParam("grant_type", "client_credential")
+                .addParam("appid", dataWxApp.getAppId())
+                .addParam("secret", dataWxApp.getAppSecret())
+                .addHeader("Content-Type", "application/json; charset=utf-8")
+                .get().sync();
+
+        DataWxMsg msg = new DataWxMsg();
+        msg.setTime(LocalDateTime.now());
+        msg.setMsg(response);
+        msg.setSource(this.getClass().getName());
+
+        dataWxMsgService.save(msg);
+
     }
 }

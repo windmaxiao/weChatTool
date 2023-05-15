@@ -31,4 +31,6 @@ public class DataWxMsg implements Serializable {
 
     private LocalDateTime time;
 
+    private String source;
+
 }

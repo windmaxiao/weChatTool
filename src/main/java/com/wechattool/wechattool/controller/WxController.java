@@ -40,13 +40,14 @@ public class WxController {
     @GetMapping("/verify")
     public String checkWx(@RequestParam("signature") String signature,
                           @RequestParam("timestamp") String timestamp,
-                          @RequestParam("nonce") String nonce,
-                          @RequestParam("echostr") String echostr) {
+                          @RequestParam("nonce")     String nonce,
+                          @RequestParam("echostr")   String echostr) {
 
 
         DataWxMsg msg = new DataWxMsg();
         msg.setTime(LocalDateTime.now());
         msg.setMsg("signature=" + signature + ";timestamp=" + timestamp + ";nonce=" + nonce + ";echostr=" + echostr);
+        msg.setSource(this.getClass().getName());
 
         dataWxMsgService.save(msg);
 
