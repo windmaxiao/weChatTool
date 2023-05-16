@@ -89,4 +89,9 @@ public class WxController {
         return responseMessage;
     }
 
+    @GetMapping("/getAccessToken")
+    public void getAccessToken() {
+
+        wxServices.getAccessToken();
+    }
 }

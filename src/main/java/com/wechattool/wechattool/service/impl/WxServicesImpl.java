@@ -6,15 +6,19 @@ import com.wechattool.wechattool.model.DataWxMsg;
 import com.wechattool.wechattool.service.IDataWxAppService;
 import com.wechattool.wechattool.service.IDataWxMsgService;
 import com.wechattool.wechattool.service.WxServices;
-import com.wechattool.wechattool.tools.OkHttpClientUtils;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -63,19 +67,35 @@ public class WxServicesImpl implements WxServices {
 
         DataWxApp dataWxApp = dataWxAppService.getWxData();
 
-        String response = OkHttpClientUtils.builder().url(ACCESS_TOKEN_URL)
-                .addParam("grant_type", "client_credential")
-                .addParam("appid", dataWxApp.getAppId())
-                .addParam("secret", dataWxApp.getAppSecret())
+        String url = ACCESS_TOKEN_URL + "?"
+                + "grant_type=client_credential"
+                + "&appid=" + dataWxApp.getAppId()
+                + "&secret=" + dataWxApp.getAppSecret();
+
+        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder()
+                .url(url)
                 .addHeader("Content-Type", "application/json; charset=utf-8")
-                .get().sync();
+                .build();
 
-        DataWxMsg msg = new DataWxMsg();
-        msg.setTime(LocalDateTime.now());
-        msg.setMsg(response);
-        msg.setSource(this.getClass().getName());
+        String responseData = "";
+        try {
+            Response response = client.newCall(request).execute();
+            responseData = Objects.requireNonNull(response.body()).string();
+        } catch (IOException e) {
+            log.info("获取AccessToken异常 : {}", e.getMessage());
+        }
 
-        dataWxMsgService.save(msg);
+        log.info("获取了AccessToken : {}", responseData);
+        if (StringUtils.isNotEmpty(responseData)) {
+            DataWxMsg msg = new DataWxMsg();
+            msg.setTime(LocalDateTime.now());
+            msg.setMsg(responseData);
+            msg.setSource(this.getClass().getName());
+            dataWxMsgService.save(msg);
+        }
+
 
     }
 }
