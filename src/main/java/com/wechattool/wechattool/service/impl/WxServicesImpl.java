@@ -1,8 +1,11 @@
 package com.wechattool.wechattool.service.impl;
 
 import cn.hutool.crypto.SecureUtil;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
+import com.wechattool.wechattool.model.AccessToken;
 import com.wechattool.wechattool.model.DataWxApp;
-import com.wechattool.wechattool.model.DataWxMsg;
+import com.wechattool.wechattool.service.AccessTokenService;
 import com.wechattool.wechattool.service.IDataWxAppService;
 import com.wechattool.wechattool.service.IDataWxMsgService;
 import com.wechattool.wechattool.service.WxServices;
@@ -34,6 +37,9 @@ public class WxServicesImpl implements WxServices {
 
     @Autowired
     IDataWxMsgService dataWxMsgService;
+
+    @Autowired
+    AccessTokenService accessTokenService;
 
     @Override
     public String checkSignature(String signature, String timestamp, String nonce, String echostr) {
@@ -88,14 +94,13 @@ public class WxServicesImpl implements WxServices {
         }
 
         log.info("获取了AccessToken : {}", responseData);
-        if (StringUtils.isNotEmpty(responseData)) {
-            DataWxMsg msg = new DataWxMsg();
-            msg.setTime(LocalDateTime.now());
-            msg.setMsg(responseData);
-            msg.setSource(this.getClass().getName());
-            dataWxMsgService.save(msg);
-        }
 
+        JSONObject json = JSONUtil.parseObj(responseData);
+        AccessToken accessToken = json.toBean(AccessToken.class);
+        accessToken.setCreateTime(LocalDateTime.now());
+        accessToken.setExpiresTime(accessToken.getCreateTime().plusSeconds(accessToken.getExpiresIn()));
+        accessTokenService.save(accessToken);
 
     }
+
 }
