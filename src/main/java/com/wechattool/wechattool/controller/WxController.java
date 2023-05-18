@@ -3,6 +3,7 @@ package com.wechattool.wechattool.controller;
 import com.wechattool.wechattool.model.DataWxMsg;
 import com.wechattool.wechattool.model.WxMessage;
 import com.wechattool.wechattool.service.IDataWxMsgService;
+import com.wechattool.wechattool.service.WxMessageService;
 import com.wechattool.wechattool.service.WxServices;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,9 @@ public class WxController {
 
     @Autowired
     WxServices wxServices;
+
+    @Autowired
+    WxMessageService wxMessageService;
 
     @Autowired
     IDataWxMsgService dataWxMsgService;
@@ -62,12 +66,7 @@ public class WxController {
             return "success";
         };
 
-
-        DataWxMsg msg = new DataWxMsg();
-        msg.setTime(LocalDateTime.now());
-        msg.setMsg(requestMessage.toString());
-        msg.setSource(this.getClass().getName() + ":receiveMessages");
-        dataWxMsgService.save(msg);
+        wxMessageService.save(requestMessage);
 
         // TODO 接收返回消息
         String fromUserName = requestMessage.getFromUserName();
@@ -85,6 +84,8 @@ public class WxController {
         responseMessage.setCreateTime(LocalDateTime.now().toInstant(ZoneOffset.of("+8")).toEpochMilli());
         //这个是响应消息内容，直接复制收到的内容做演示，甚至整个响应对象都可以直接使用原请求参数对象，只需要换下from和to就可以了哈哈哈
         responseMessage.setContent(requestMessage.getContent());
+
+        wxMessageService.save(responseMessage);
 
         return responseMessage;
     }
